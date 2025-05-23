@@ -41,7 +41,7 @@ app.post('/project', async (c) => {
 
 	await saveProject(c.env.PROJECT_KV, project);
 
-	return c.json({ message: 'Project created', project });
+	return c.json({ message: 'Project created', id });
 });
 
 // get all projects
