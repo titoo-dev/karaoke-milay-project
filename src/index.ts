@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { KVNamespace } from '@cloudflare/workers-types';
 import { v4 as uuidv4 } from 'uuid';
+import { cors } from 'hono/cors';
 
 type Bindings = {
 	PROJECT_KV: KVNamespace;
@@ -25,6 +26,8 @@ async function saveProject(env: KVNamespace, project: any) {
 	project.updatedAt = new Date().toISOString();
 	await env.put(`project:${project.id}`, JSON.stringify(project));
 }
+
+app.use('*', cors());
 
 app.post('/project', async (c) => {
 	const { name, audioId } = await c.req.json();
