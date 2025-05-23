@@ -17,7 +17,7 @@ type Project = {
 	createdAt: string;
 	updatedAt: string;
 	lyricsId?: string;
-	audioId?: string;
+	audioId: string;
 	assetIds?: string[];
 };
 
@@ -27,11 +27,17 @@ async function saveProject(env: KVNamespace, project: any) {
 }
 
 app.post('/project', async (c) => {
-	const { name } = await c.req.json();
+	const { name, audioId } = await c.req.json();
 
 	const id = uuidv4();
 	const now = new Date().toISOString();
-	const project: Project = { id, name, createdAt: now, updatedAt: now };
+	const project: Project = {
+		id,
+		name,
+		createdAt: now,
+		updatedAt: now,
+		audioId,
+	};
 
 	await saveProject(c.env.PROJECT_KV, project);
 
