@@ -22,7 +22,7 @@ type Project = {
 	assetIds?: string[];
 };
 
-async function saveProject(env: KVNamespace, project: any) {
+async function saveProject(env: KVNamespace, project: Project) {
 	project.updatedAt = new Date().toISOString();
 	await env.put(`project:${project.id}`, JSON.stringify(project));
 }
