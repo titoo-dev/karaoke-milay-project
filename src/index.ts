@@ -59,11 +59,11 @@ app.get('/projects', async (c) => {
 	const projects = await Promise.all(
 		keys.keys.map(async (key) => {
 			const raw = await c.env.PROJECT_KV.get(key.name);
-			return JSON.parse(raw!);
+			return raw ? JSON.parse(raw) : null;
 		})
 	);
 
-	return c.json(projects);
+	return c.json(projects.filter((p) => p !== null));
 });
 
 app.get('/project/:id', async (c) => {
