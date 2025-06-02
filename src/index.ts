@@ -1,9 +1,12 @@
 import { Hono } from 'hono';
-import { KVNamespace } from '@cloudflare/workers-types';
+import { KVNamespace, R2Bucket } from '@cloudflare/workers-types';
 import { v4 as uuidv4 } from 'uuid';
 import { cors } from 'hono/cors';
 
 type Bindings = {
+	AUDIO_FILES: R2Bucket;
+	AUDIO_KV: KVNamespace;
+	COVER_FILES: R2Bucket;
 	PROJECT_KV: KVNamespace;
 };
 
@@ -87,10 +90,27 @@ app.put('/project/:id', async (c) => {
 
 app.delete('/project/:id', async (c) => {
 	const id = c.req.param('id');
-	const raw = await c.env.PROJECT_KV.get(`project:${id}`);
-	if (!raw) return c.text('Project not found', 404);
+	const rawProject = await c.env.PROJECT_KV.get(`project:${id}`);
+	if (!rawProject) return c.text('Project not found', 404);
+
+	const project = JSON.parse(rawProject);
+
+	const rawAudio = await c.env.AUDIO_KV.get(`audio:${project.audioId}`);
+
+	if (!rawAudio) return c.text('Audio not found', 404);
+
+	const audio = JSON.parse(rawAudio);
 
 	await c.env.PROJECT_KV.delete(`project:${id}`);
+	await c.env.AUDIO_KV.delete(`audio:${audio.id}`);
+
+	await c.env.AUDIO_FILES.delete(`${audio.id}.mp3`);
+
+	const coverKey = `${audio.coverArt.id}.${
+		audio.coverArt.format.split('/')[1] || 'jpg'
+	}`;
+
+	await c.env.COVER_FILES.delete(coverKey);
 
 	return c.json({ message: 'Project deleted', id });
 });

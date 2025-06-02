@@ -13,14 +13,24 @@
     {
       "binding": "PROJECT_KV",
       "id": "2e5c94a3bd8343538ec316db723a41f7"
+    },
+    {
+      "binding": "AUDIO_KV",
+      "id": "eee11ecb8e0547f584f56a1716cae4a3",
     }
   ],
-  // "r2_buckets": [
-  //   {
-  //     "binding": "MY_BUCKET",
-  //     "bucket_name": "my-bucket"
-  //   }
-  // ],
+  "r2_buckets": [
+    {
+      "binding": "AUDIO_FILES",
+      "bucket_name": "audio-files",
+      "preview_bucket_name": "audio-files"
+    },
+    {
+      "binding": "COVER_FILES",
+      "bucket_name": "cover-files",
+      "preview_bucket_name": "cover-files"
+    },
+  ],
   // "d1_databases": [
   //   {
   //     "binding": "MY_DB",
