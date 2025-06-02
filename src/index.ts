@@ -60,7 +60,7 @@ app.get('/projects', async (c) => {
 		})
 	);
 
-	return c.json({ projects });
+	return c.json(projects);
 });
 
 app.get('/project/:id', async (c) => {
