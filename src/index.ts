@@ -8,6 +8,7 @@ type Bindings = {
 	AUDIO_KV: KVNamespace;
 	COVER_FILES: R2Bucket;
 	PROJECT_KV: KVNamespace;
+	LYRICS_KV: KVNamespace;
 };
 
 const app = new Hono<{
@@ -20,9 +21,20 @@ type Project = {
 	description?: string;
 	createdAt: string;
 	updatedAt: string;
-	lyricsId?: string;
 	audioId: string;
-	assetIds?: string[];
+};
+
+type Lyrics = {
+	id: string;
+	createdAt: string;
+	updatedAt: string;
+	text: string;
+	projectId: string;
+	lines: {
+		id: number;
+		text: string;
+		timestamp?: number;
+	}[];
 };
 
 async function saveProject(env: KVNamespace, project: Project) {
@@ -81,7 +93,26 @@ app.put('/project/:id', async (c) => {
 	const project = JSON.parse(raw);
 	const updates = await c.req.json();
 
-	// Apply changes
+	// Handle lyrics if provided
+	if (updates.lyrics) {
+		const lyricsId = uuidv4();
+		const now = new Date().toISOString();
+		const lyrics: Lyrics = {
+			id: lyricsId,
+			createdAt: now,
+			updatedAt: now,
+			text: updates.lyrics.text || '',
+			projectId: id,
+			lines: updates.lyrics.lines || [],
+		};
+
+		await c.env.LYRICS_KV.put(`lyrics:${lyricsId}`, JSON.stringify(lyrics));
+
+		// Remove lyrics from updates to avoid storing in project
+		delete updates.lyrics;
+	}
+
+	// Apply other changes
 	Object.assign(project, updates);
 	await saveProject(c.env.PROJECT_KV, project);
 
